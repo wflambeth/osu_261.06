@@ -53,62 +53,114 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        if key already exists in hashmap: 
+                update its value to provided value
+        if not: 
+                add the key/value pair 
+
+
+        STEPS: 
+        * run value through hash function
+        * Take modulo of that number based on self._size to find index 
+        * Find the LL at that index
+        * Iterate through it to see if it appears in the LL, insert it if not. 
+            * if inserted, increment size 
         """
-        pass
+        hash = self._hash_function(key)
+        index = hash % self.get_capacity()
+
+        chain = self._buckets[index]
+        for node in chain: # TODO: Make sure I can use this loop format 
+            if node.key == key:
+                node.value = value
+                return
+        
+        chain.insert(key, value)
+        self._size += 1
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        return the number of empty buckets in the current hash table
+
+        STEPS: Iterate through indices in table, increment counter if a bucket is empty. return counter. 
         """
-        pass
+        empty_count = 0
+
+        for i in range(self._buckets.length()):
+            if self._buckets[i].length() == 0:
+                empty_count += 1
+        
+        return empty_count
+        
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        returns the load factor of the current hash table 
+        load factor = avg number of elements in each bucket
+
+        STEPS: 
+        elements divided by buckets (or self._size / self._capacity)
         """
-        pass
+        return self._size / self._capacity
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
+        clears the current contents of the hash map, WITHOUT changing its capacity 
+
+        STEPS:
+        Iterate through each value in array and set it to an empty LL.  
+        set size to 0
         """
-        pass
+        for i in range(self._buckets.length()):
+            self._buckets[i] = LinkedList()
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        changes capacity of internal hash table
+            - all existing k/v pairs remain 
+            - all hash table links must be rehashed 
+            - if new_capacity is < 1, does nothing
         """
         pass
 
     def get(self, key: str) -> object:
         """
-        TODO: Write this implementation
+        returns value associated with given key 
         """
         pass
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
+        returns True if given value is present in hash map, False otherwise 
         """
         pass
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
+        removes given key (and associated value) from map
+        if key not in map, does nothing (no need to raise exception)
         """
         pass
 
     def get_keys(self) -> DynamicArray:
         """
-        TODO: Write this implementation
+        returns DynamicArray holding all keys currently in map. 
+        order does not matter. 
         """
         pass
 
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
-    TODO: Write this implementation
+    Receives dynamicarray (potentially not sorted)
+    Returns tuple containing the mode value of array, in a new DynamicArray, and integer that represents its frequency. 
+    If multiple modes, return all - order does not matter. 
+    may assume: 
+    - input contains at least one element
+    - all values stored in array will be strings
+    
+    Must be implemented in O(n) time
+    Use SC HashMap function provided below. 
     """
     # if you'd like to use a hash map,
     # use this instance of your Separate Chaining HashMap
