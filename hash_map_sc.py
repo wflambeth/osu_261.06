@@ -6,7 +6,7 @@
 # Description:
 
 
-from a6_include import (DynamicArray, LinkedList,
+from a6_include import (DynamicArray, LinkedList, SLNode,
                         hash_function_1, hash_function_2)
 
 
@@ -104,38 +104,82 @@ class HashMap:
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        changes capacity of internal hash table
-            - all existing k/v pairs remain 
-            - all hash table links must be rehashed 
-            - if new_capacity is < 1, does nothing
+        Resizes the hash table to given capacity, re-hashing and storing
+        existing elements. Does nothing if provided capacity is < 1.
         """
-        pass
+        if new_capacity < 1: 
+            return
+        
+        # Instantiate new bucket list with provided capacity, fill with empty lists
+        old_buckets = self._buckets
+        self._buckets = DynamicArray()
+        self._capacity = new_capacity
+        for _ in range(new_capacity):
+            self._buckets.append(LinkedList())
+        
+        # Iterate over old elements and hash/place in new list
+        # TODO: This is time-expensive (is it n^2?), so refactor using get_keys/get below
+        for i in range(old_buckets.length()):
+            for node in old_buckets[i]:
+                self.put(node.key, node.value)
 
     def get(self, key: str) -> object:
         """
-        returns value associated with given key 
+        Returns the stored value associated with a given key. If value
+        is not present, returns None. 
         """
-        pass
+        index = self._hash_function(key) % self._capacity
+        bucket = self._buckets[index]
+        for node in bucket: #TODO: Another for-in, make sure is kosher
+            if node.key == key:
+                return node.value
+        
+        return None
 
     def contains_key(self, key: str) -> bool:
         """
-        returns True if given value is present in hash map, False otherwise 
+        Returns True if given key is present in hash map, False otherwise.
         """
-        pass
+        bucket = self._get_bucket(key)
+        for node in bucket: 
+            if node.key == key:
+                return True
+        
+        return False
 
     def remove(self, key: str) -> None:
         """
-        removes given key (and associated value) from map
-        if key not in map, does nothing (no need to raise exception)
+        Removes given key (and associated value) from hash map. If the key
+        is not present in the map, does nothing. 
         """
-        pass
+        bucket = self._get_bucket(key)
+        bucket.remove(key)
 
     def get_keys(self) -> DynamicArray:
         """
-        returns DynamicArray holding all keys currently in map. 
-        order does not matter. 
+        Returns an unordered DynamicArray holding all keys currently in hash map. 
         """
-        pass
+        keys = DynamicArray()
+        for i in range(self._capacity): 
+            for node in self._buckets[i]:
+                keys.append(node.key)
+        
+        return keys
+
+    def _get_bucket(self, key: str) -> LinkedList: # TODO: Refactor other methods above to use this, as needed 
+        """
+        Helper method to locate the "bucket" (LinkedList) associated with a 
+        given hashed index. 
+        """
+        index = self._hash_function(key) % self._capacity
+        bucket = self._buckets[index]
+        return bucket
+    
+    def _get_node(self, key: str) -> SLNode: # TODO: Can I make use of this? Remove if not.
+        bucket = self._get_bucket(key)
+        for node in bucket: 
+            if node.key == key: 
+                return key 
 
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
