@@ -53,36 +53,29 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        if key already exists in hashmap: 
-                update its value to provided value
-        if not: 
-                add the key/value pair 
-
-
-        STEPS: 
-        * run value through hash function
-        * Take modulo of that number based on self._size to find index 
-        * Find the LL at that index
-        * Iterate through it to see if it appears in the LL, insert it if not. 
-            * if inserted, increment size 
+        Takes a key-value pair and stores it in the hash table. If an
+        element already exists with that key, updates its value instead.
         """
+        # Find index of bucket via hashing 
         hash = self._hash_function(key)
         index = hash % self.get_capacity()
 
-        chain = self._buckets[index]
-        for node in chain: # TODO: Make sure I can use this loop format 
+        # Iterate through bucketed list
+        bucket = self._buckets[index]
+        for node in bucket: # TODO: Make sure I can use this loop format 
+            # Update value with provided key, if already exists
             if node.key == key:
                 node.value = value
                 return
         
-        chain.insert(key, value)
+        # If not, add this value to the list and increment size 
+        bucket.insert(key, value)
         self._size += 1
 
     def empty_buckets(self) -> int:
         """
-        return the number of empty buckets in the current hash table
-
-        STEPS: Iterate through indices in table, increment counter if a bucket is empty. return counter. 
+        Returns the number of buckets in the current hash table which
+        contain no elements. 
         """
         empty_count = 0
 
@@ -95,21 +88,14 @@ class HashMap:
 
     def table_load(self) -> float:
         """
-        returns the load factor of the current hash table 
-        load factor = avg number of elements in each bucket
-
-        STEPS: 
-        elements divided by buckets (or self._size / self._capacity)
+        Returns the load factor of the current hash table. 
         """
         return self._size / self._capacity
 
     def clear(self) -> None:
         """
-        clears the current contents of the hash map, WITHOUT changing its capacity 
-
-        STEPS:
-        Iterate through each value in array and set it to an empty LL.  
-        set size to 0
+        Empties the current hash table of its contents, while
+        preserving its capacity. 
         """
         for i in range(self._buckets.length()):
             self._buckets[i] = LinkedList()
