@@ -100,6 +100,8 @@ class HashMap:
         for i in range(self._buckets.length()):
             self._buckets[i] = LinkedList()
 
+        self._size = 0
+
     def resize_table(self, new_capacity: int) -> None:
         """
         changes capacity of internal hash table
