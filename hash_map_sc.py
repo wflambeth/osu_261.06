@@ -1,9 +1,10 @@
-# Name:
-# OSU Email:
+# Name: Will Lambeth
+# OSU Email: lambethw@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: 06 part 1 - Hash map with separate chaining
+# Due Date: 03 June 2022    
+# Description: An implementation of a hash map using separate chaining to resolve collisions.
+#              Includes additional method to find the mode of a given hash map. 
 
 
 from a6_include import (DynamicArray, LinkedList, SLNode,

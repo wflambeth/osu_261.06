@@ -1,9 +1,9 @@
-# Name:
-# OSU Email:
+# Name: Will Lambeth
+# OSU Email: lambethw@oregonstate.edu
 # Course: CS261 - Data Structures
-# Assignment:
-# Due Date:
-# Description:
+# Assignment: 06 part 2 - Hash map with open addressing
+# Due Date: 03 June 2022    
+# Description: An implementation of a hash map using open addressing to resolve collisions. 
 
 
 from asyncio import proactor_events
@@ -84,12 +84,7 @@ class HashMap:
         """
         Returns the number of empty buckets in the current hash table.
         """
-        empties = 0
-        for i in range(self._capacity):
-            if self._buckets[i] == None or self._buckets[i].is_tombstone: #TODO: Can this just be capacity - size? 
-                empties += 1
-        
-        return empties
+        return (self._capacity - self._size)
 
     def resize_table(self, new_capacity: int) -> None:
         """
