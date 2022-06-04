@@ -62,7 +62,7 @@ class HashMap:
 
         # Iterate through bucketed list
         bucket = self._buckets[index]
-        for node in bucket: # TODO: Make sure I can use this loop format 
+        for node in bucket: 
             # Update value with provided key, if already exists
             if node.key == key:
                 node.value = value
@@ -133,7 +133,7 @@ class HashMap:
         """
         index = self._hash_function(key) % self._capacity
         bucket = self._buckets[index]
-        for node in bucket: #TODO: Another for-in, make sure is kosher
+        for node in bucket:
             if node.key == key:
                 return node.value
         
