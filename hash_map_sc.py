@@ -85,7 +85,6 @@ class HashMap:
         
         return empty_count
         
-
     def table_load(self) -> float:
         """
         Returns the load factor of the current hash table. 
@@ -153,7 +152,10 @@ class HashMap:
         is not present in the map, does nothing. 
         """
         bucket = self._get_bucket(key)
-        bucket.remove(key)
+        removed = bucket.remove(key)
+
+        if removed:
+            self._size -= 1
 
     def get_keys(self) -> DynamicArray:
         """
@@ -193,11 +195,60 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     
     Must be implemented in O(n) time
     Use SC HashMap function provided below. 
-    """
-    # if you'd like to use a hash map,
-    # use this instance of your Separate Chaining HashMap
-    map = HashMap(da.length() // 3, hash_function_1)
 
+    STEPS: 
+    - create hashmap (as shown below), with each string as a key and each value as a counter. (that's the best way, right?)
+    - iterate over list and store it in the hashmap, with the keys being used as strings. O(n)
+        - value is 1 if an item does not already exist in list; value += 1 otherwise 
+        - as we insert, track a "highest_value" tuple parameter and update it as needed. 
+    - then, simply return that tuple. 
+    - could also probably do this O(n) by just taking another run through the list, but ey, why not save ourselves some work huh 
+
+    ### OKAY 
+    Need to do this a different way without access to hashmap internal methods 
+    * hash the value 
+    * use get_bucket method to find the bucket I need 
+    * use bucket(LL)'s contains() method to pull the needed value
+        * if it returns a node, increment its value by one
+        * if it doesn't, add a new node with that key and value 1
+        ** can also be tracking "current_mode" using an internal tuple parameter, checking against this value. 
+
+    """
+    map = HashMap(da.length() // 3, hash_function_1)
+    
+    for i in range(da.length()):
+        key = da[i]
+        count = map.get(key)
+        if count is None: 
+            map.put(key, 1)
+        else:
+            map.put(key, count + 1)
+
+    mode_strings = DynamicArray()
+    mode_count = 0   
+
+    # TODO: This is hot wet shit and probably not how you're "supposed to" do it. 
+    map_keys = map.get_keys()
+    for i in range(map_keys.length()):
+        key = map_keys[i]
+        value = map.get(key)
+        if value > mode_count:
+            mode_strings = DynamicArray()
+            mode_strings.append(key)
+            mode_count = value
+        elif value == mode_count:
+            # check if a duplicate exists
+            # TODO: Is this fucking up the time complexity or is it kosher? 
+            found = False
+            for j in range(mode_strings.length()):
+                if mode_strings[j] == key:
+                    found = True
+                    break
+            
+            if not found: 
+                mode_strings.append(key)
+
+    return (mode_strings, mode_count)
 
 # ------------------- BASIC TESTING ---------------------------------------- #
 
