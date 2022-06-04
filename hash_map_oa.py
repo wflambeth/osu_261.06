@@ -6,6 +6,7 @@
 # Description:
 
 
+from asyncio import proactor_events
 from a6_include import (DynamicArray, HashEntry,
                         hash_function_1, hash_function_2)
 
@@ -53,61 +54,138 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        * Must use DynamicArray to store OA hash table
+        * Must use quadratic probing to resolve collisions (both in put and get)
+            - i = initial_i + j^2 (j = 1,2,3...) % array.length()
+            - start with initial + 0^2, then initial + 1^2, then initial + 2^2...do a while loop here. 
+            - if value == None or _TS_, put it there
+        * Must resize (double capacity) if load factor is >= 0.5, before adding new K/V pair 
+        * Update key if it exists, otherwise add and increment size 
+        
+        * Check for tombstone values 
         """
-        # remember, if the load factor is greater than or equal to 0.5,
-        # resize the table before putting the new key/value pair
-        pass
+        load_factor = self.table_load()
+        if load_factor >= 0.5:
+            self.resize_table(self._capacity * 2)
+
+
+        index = self._get_index(key, False)
+        element = self._buckets[index]
+        if element == None: 
+            self._buckets[index] = HashEntry(key, value)
+            self._size += 1
+        else:
+            element.value = value
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        * are tombstones included in table_load? YES
         """
-        pass
+        empties = self.empty_buckets()
+        return (self._capacity - empties) / self._capacity
+
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        * INCLUDE tombstones (as non-empty)
         """
-        pass
+        empties = 0
+        for i in range(self._capacity):
+            if self._buckets[i] == None:
+                empties += 1
+        
+        return empties
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        * DON'T include tombstones
         """
-        # remember to rehash non-deleted entries into new table
-        pass
+
+        # Validate new capacity and return if not valid
+        if new_capacity < 1 or new_capacity < self._size:
+            return 
+
+        old_table = self._buckets
+
+        # Fill new array with requested number of buckets
+        self._buckets = DynamicArray()
+        for _ in range(new_capacity):
+            self._buckets.append(None)
+        self._capacity = new_capacity
+        self._size = 0
+
+        # Rehash and populate new array with old values
+        for i in range(old_table.length()):
+            entry = old_table[i]
+            if entry != None and entry.is_tombstone == False:
+                self.put(entry.key, entry.value)
 
     def get(self, key: str) -> object:
         """
         TODO: Write this implementation
+
+        * Skip over _TS_ values
         """
         pass
 
     def contains_key(self, key: str) -> bool:
         """
         TODO: Write this implementation
+
+        * DON'T include tombstones
         """
         pass
 
     def remove(self, key: str) -> None:
         """
         TODO: Write this implementation
+
+        * Replace with tombstone
         """
         pass
 
     def clear(self) -> None:
         """
         TODO: Write this implementation
+
         """
         pass
 
     def get_keys(self) -> DynamicArray:
         """
         TODO: Write this implementation
+
+        * DON'T include tombstones
         """
         pass
 
+    def _get_index(self, key: str, skip_tombstones: bool=True) -> int:
+        """
+        Takes a key and an optional parameter to accept/ignore tombstone values. 
+        Returns the index of the given key in the hashmap, or of the first open
+        index if key is not found. 
+        """
+        #TODO: Should I just refactor this to return the element, not the index? Save us all a step? 
+        index = self._hash_function(key) % self._capacity
+        item = self._buckets[index]
+        probe_iterator = 0
+
+        # Follow quadratic probing until matching key or empty slot is found. 
+        while item is not None: 
+            # If an item matches the key and tombstone values are not ignored, return it
+            if item.key == key and item.is_tombstone == False:
+                return index
+            # If it is a tombstone, return it if requested. Otherwise, iterate loop 
+            elif item.key == key and skip_tombstones == False: 
+                return index 
+
+            # Find next quadratic probe index and continue
+            probe_iterator += 1
+            index = (index + probe_iterator ** 2) % self._capacity
+            item = self._buckets[index]
+
+        # Return index of first None found, if item not in list
+        return index
 
 # ------------------- BASIC TESTING ---------------------------------------- #
 
