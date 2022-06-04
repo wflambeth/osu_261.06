@@ -68,7 +68,6 @@ class HashMap:
         if load_factor >= 0.5:
             self.resize_table(self._capacity * 2)
 
-
         index = self._get_index(key, False)
         element = self._buckets[index]
         if element == None: 
@@ -122,43 +121,49 @@ class HashMap:
 
     def get(self, key: str) -> object:
         """
-        TODO: Write this implementation
-
-        * Skip over _TS_ values
         """
-        pass
+        index = self._get_index(key)
+        return self._buckets[index].value        
 
     def contains_key(self, key: str) -> bool:
         """
         TODO: Write this implementation
-
-        * DON'T include tombstones
         """
-        pass
+        index = self._get_index(key)
+        return self._buckets[index] != None 
 
     def remove(self, key: str) -> None:
         """
         TODO: Write this implementation
-
-        * Replace with tombstone
         """
-        pass
+        index = self._get_index(key)
+        element = self._buckets[index]
+
+        if element != None: 
+            element.is_tombstone = True
+            self._size -= 1
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
-
         """
-        pass
+        self._size = 0
+        self._buckets = DynamicArray()
+
+        for _ in range(self._capacity):
+            self._buckets.append(None)
 
     def get_keys(self) -> DynamicArray:
         """
-        TODO: Write this implementation
-
-        * DON'T include tombstones
         """
-        pass
+        keys = DynamicArray()
+        for i in range(self._capacity):
+            element = self._buckets[i]
+            if element != None and element.is_tombstone == False: 
+                keys.append(element.key)
+        
+        return keys
 
+    # TODO: Make sure this/the program handles instances where capacity is 0 
     def _get_index(self, key: str, skip_tombstones: bool=True) -> int:
         """
         Takes a key and an optional parameter to accept/ignore tombstone values. 
@@ -166,22 +171,21 @@ class HashMap:
         index if key is not found. 
         """
         #TODO: Should I just refactor this to return the element, not the index? Save us all a step? 
-        index = self._hash_function(key) % self._capacity
-        item = self._buckets[index]
-        probe_iterator = 0
+        initial_index = self._hash_function(key) % self._capacity
 
-        # Follow quadratic probing until matching key or empty slot is found. 
+        probe_iterator = 0 # TODO: Can I refactor this into the below loop? Or don't I need that initial value
+        index = initial_index
+        item = self._buckets[index]
+
         while item is not None: 
-            # If an item matches the key and tombstone values are not ignored, return it
             if item.key == key and item.is_tombstone == False:
                 return index
-            # If it is a tombstone, return it if requested. Otherwise, iterate loop 
             elif item.key == key and skip_tombstones == False: 
                 return index 
 
             # Find next quadratic probe index and continue
             probe_iterator += 1
-            index = (index + probe_iterator ** 2) % self._capacity
+            index = (initial_index + (probe_iterator ** 2)) % self._capacity
             item = self._buckets[index]
 
         # Return index of first None found, if item not in list
