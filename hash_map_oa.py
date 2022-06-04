@@ -54,23 +54,15 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        * Must use DynamicArray to store OA hash table
-        * Must use quadratic probing to resolve collisions (both in put and get)
-            - i = initial_i + j^2 (j = 1,2,3...) % array.length()
-            - start with initial + 0^2, then initial + 1^2, then initial + 2^2...do a while loop here. 
-            - if value == None or _TS_, put it there
-        * Must resize (double capacity) if load factor is >= 0.5, before adding new K/V pair 
-        * Update key if it exists, otherwise add and increment size 
-        
-        * Check for tombstone values 
         """
+        # TODO: Overall, make sure the way I'm treating tombstones makes sense. In terms of size, emptiness, etc etc etc
         load_factor = self.table_load()
         if load_factor >= 0.5:
             self.resize_table(self._capacity * 2)
 
         index = self._get_index(key, False)
         element = self._buckets[index]
-        if element == None: 
+        if element == None or element.is_tombstone:
             self._buckets[index] = HashEntry(key, value)
             self._size += 1
         else:
@@ -78,7 +70,6 @@ class HashMap:
 
     def table_load(self) -> float:
         """
-        * are tombstones included in table_load? YES
         """
         empties = self.empty_buckets()
         return (self._capacity - empties) / self._capacity
@@ -86,18 +77,16 @@ class HashMap:
 
     def empty_buckets(self) -> int:
         """
-        * INCLUDE tombstones (as non-empty)
         """
         empties = 0
         for i in range(self._capacity):
-            if self._buckets[i] == None:
+            if self._buckets[i] == None or self._buckets[i].is_tombstone:
                 empties += 1
         
         return empties
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        * DON'T include tombstones
         """
 
         # Validate new capacity and return if not valid
@@ -131,14 +120,12 @@ class HashMap:
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
         """
         index = self._get_index(key)
         return self._buckets[index] != None 
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
         """
         index = self._get_index(key)
         element = self._buckets[index]
