@@ -56,12 +56,8 @@ class HashMap:
         Takes a key-value pair and stores it in the hash table. If an
         element already exists with that key, updates its value instead.
         """
-        # Find index of bucket via hashing 
-        hash = self._hash_function(key)
-        index = hash % self.get_capacity()
 
-        # Iterate through bucketed list
-        bucket = self._buckets[index]
+        bucket = self._get_bucket(key)
         for node in bucket: 
             # Update value with provided key, if already exists
             if node.key == key:
@@ -102,8 +98,6 @@ class HashMap:
         for _ in range(self._capacity):
             self._buckets.append(LinkedList())
 
-        
-
     def resize_table(self, new_capacity: int) -> None:
         """
         Resizes the hash table to given capacity, re-hashing and storing
@@ -121,7 +115,6 @@ class HashMap:
             self._buckets.append(LinkedList())
         
         # Iterate over old elements and hash/place in new list
-        # TODO: This is time-expensive (is it n^2?), so refactor if we have time
         for i in range(old_buckets.length()):
             for node in old_buckets[i]:
                 self.put(node.key, node.value)
@@ -131,8 +124,7 @@ class HashMap:
         Returns the stored value associated with a given key. If value
         is not present, returns None. 
         """
-        index = self._hash_function(key) % self._capacity
-        bucket = self._buckets[index]
+        bucket = self._get_bucket(key)
         for node in bucket:
             if node.key == key:
                 return node.value
@@ -172,7 +164,7 @@ class HashMap:
         
         return keys
 
-    def _get_bucket(self, key: str) -> LinkedList: # TODO: Refactor other methods above to use this, as needed 
+    def _get_bucket(self, key: str) -> LinkedList:
         """
         Helper method to locate the "bucket" (LinkedList) associated with a 
         given hashed index. 
@@ -180,46 +172,15 @@ class HashMap:
         index = self._hash_function(key) % self._capacity
         bucket = self._buckets[index]
         return bucket
-    
-    def _get_node(self, key: str) -> SLNode: # TODO: Can I make use of this? Remove if not.
-        bucket = self._get_bucket(key)
-        for node in bucket: 
-            if node.key == key: 
-                return key 
 
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
-    Receives dynamicarray (potentially not sorted)
-    Returns tuple containing the mode value of array, in a new DynamicArray, and integer that represents its frequency. 
-    If multiple modes, return all - order does not matter. 
-    may assume: 
-    - input contains at least one element
-    - all values stored in array will be strings
-    
-    Must be implemented in O(n) time
-    Use SC HashMap function provided below. 
-
-    STEPS: 
-    - create hashmap (as shown below), with each string as a key and each value as a counter. (that's the best way, right?)
-    - iterate over list and store it in the hashmap, with the keys being used as strings. O(n)
-        - value is 1 if an item does not already exist in list; value += 1 otherwise 
-        - as we insert, track a "highest_value" tuple parameter and update it as needed. 
-    - then, simply return that tuple. 
-    - could also probably do this O(n) by just taking another run through the list, but ey, why not save ourselves some work huh 
-
-    ### OKAY 
-    Need to do this a different way without access to hashmap internal methods 
-    * hash the value 
-    * use get_bucket method to find the bucket I need 
-    * use bucket(LL)'s contains() method to pull the needed value
-        * if it returns a node, increment its value by one
-        * if it doesn't, add a new node with that key and value 1
-        ** can also be tracking "current_mode" using an internal tuple parameter, checking against this value. 
-
+    Takes a DynamicArray and returns the element or elements with the
+    highest frequency, along with the number of times they appear. 
     """
+    # Count each string's frequency and populate hashmap 
     map = HashMap(da.length() // 3, hash_function_1)
-    
     for i in range(da.length()):
         key = da[i]
         count = map.get(key)
@@ -231,26 +192,19 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     mode_strings = DynamicArray()
     mode_count = 0   
 
-    # TODO: This is hot wet shit and probably not how you're "supposed to" do it. 
+    # Iterate over strings in map, checking for highest freqeuency
     map_keys = map.get_keys()
     for i in range(map_keys.length()):
         key = map_keys[i]
         value = map.get(key)
+        # If higher than current highest, store as new mode 
         if value > mode_count:
             mode_strings = DynamicArray()
             mode_strings.append(key)
             mode_count = value
+        # If equal, add to list of current modes 
         elif value == mode_count:
-            # check if a duplicate exists
-            # TODO: Is this fucking up the time complexity or is it kosher? 
-            found = False
-            for j in range(mode_strings.length()):
-                if mode_strings[j] == key:
-                    found = True
-                    break
-            
-            if not found: 
-                mode_strings.append(key)
+            mode_strings.append(key)
 
     return (mode_strings, mode_count)
 
