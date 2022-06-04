@@ -96,10 +96,13 @@ class HashMap:
         Empties the current hash table of its contents, while
         preserving its capacity. 
         """
-        for i in range(self._buckets.length()):
-            self._buckets[i] = LinkedList()
-
         self._size = 0
+        self._buckets = DynamicArray()
+
+        for _ in range(self._capacity):
+            self._buckets.append(LinkedList())
+
+        
 
     def resize_table(self, new_capacity: int) -> None:
         """
@@ -113,11 +116,12 @@ class HashMap:
         old_buckets = self._buckets
         self._buckets = DynamicArray()
         self._capacity = new_capacity
+        self._size = 0
         for _ in range(new_capacity):
             self._buckets.append(LinkedList())
         
         # Iterate over old elements and hash/place in new list
-        # TODO: This is time-expensive (is it n^2?), so refactor using get_keys/get below
+        # TODO: This is time-expensive (is it n^2?), so refactor if we have time
         for i in range(old_buckets.length()):
             for node in old_buckets[i]:
                 self.put(node.key, node.value)
