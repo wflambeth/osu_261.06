@@ -56,17 +56,19 @@ class HashMap:
         """
         Takes a key-value pair and stores it in the hash table. 
         """
-        # TODO: Overall, make sure the way I'm treating tombstones makes sense. In terms of size, emptiness, etc etc etc
         # Check load factor and resize if needed
         load_factor = self.table_load()
         if load_factor >= 0.5:
             self.resize_table(self._capacity * 2)
 
+        # Retrieve index of matching element, or first open index
         index = self._get_index(key, False)
         element = self._buckets[index]
+        # If index is open, insert key/value pair there
         if element == None or element.is_tombstone:
             self._buckets[index] = HashEntry(key, value)
             self._size += 1
+        # Otherwise, update element's value to provided value
         else:
             element.value = value
 
@@ -84,7 +86,7 @@ class HashMap:
         """
         empties = 0
         for i in range(self._capacity):
-            if self._buckets[i] == None or self._buckets[i].is_tombstone:
+            if self._buckets[i] == None or self._buckets[i].is_tombstone: #TODO: Can this just be capacity - size? 
                 empties += 1
         
         return empties
@@ -126,7 +128,7 @@ class HashMap:
     def contains_key(self, key: str) -> bool:
         """
         Takes a string and returns a boolean denoting whether that string
-        is a valid key. 
+        is a valid key in the current hash table.
         """
         index = self._get_index(key)
         return self._buckets[index] != None 
@@ -167,32 +169,34 @@ class HashMap:
         
         return keys
 
-    # TODO: Make sure this/the program handles instances where capacity is 0 
     def _get_index(self, key: str, skip_tombstones: bool=True) -> int:
         """
         Helper method that takes a key and an optional parameter to accept/ignore 
         tombstone values. Returns the index of the given key in the hashmap, 
         or of the first open index if key is not found. 
         """
-        #TODO: Should I just refactor this to return the element, not the index? Save us all a step? 
         initial_index = self._hash_function(key) % self._capacity
 
-        probe_iterator = 0 # TODO: Can I refactor this into the below loop? Or don't I need that initial value
+        # Find first hashed index and set up for probing
+        probe_iterator = 0 
         index = initial_index
         item = self._buckets[index]
 
+        # Loop until empty element is found
         while item is not None: 
+            # Return if item is found (and isn't a tombstone)
             if item.key == key and item.is_tombstone == False:
                 return index
+            # Also return on tombstones if operation requires (i.e. put())
             elif item.key == key and skip_tombstones == False: 
                 return index 
 
-            # Find next quadratic probe index and continue
+            # If not a match or an empty index, increment probe and continue
             probe_iterator += 1
             index = (initial_index + (probe_iterator ** 2)) % self._capacity
             item = self._buckets[index]
 
-        # Return index of first None found, if item not in list
+        # If key not found, return index of first open spot
         return index
 
 # ------------------- BASIC TESTING ---------------------------------------- #
