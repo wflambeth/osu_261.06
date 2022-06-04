@@ -123,7 +123,11 @@ class HashMap:
         """
         """
         index = self._get_index(key)
-        return self._buckets[index].value        
+        element = self._buckets[index]
+        if element != None: 
+            return element.value
+        else:
+            return None     
 
     def contains_key(self, key: str) -> bool:
         """
