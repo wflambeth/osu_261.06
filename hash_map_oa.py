@@ -54,8 +54,10 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
+        Takes a key-value pair and stores it in the hash table. 
         """
         # TODO: Overall, make sure the way I'm treating tombstones makes sense. In terms of size, emptiness, etc etc etc
+        # Check load factor and resize if needed
         load_factor = self.table_load()
         if load_factor >= 0.5:
             self.resize_table(self._capacity * 2)
@@ -70,6 +72,7 @@ class HashMap:
 
     def table_load(self) -> float:
         """
+        Returns the load factor of the current hash table. 
         """
         empties = self.empty_buckets()
         return (self._capacity - empties) / self._capacity
@@ -77,6 +80,7 @@ class HashMap:
 
     def empty_buckets(self) -> int:
         """
+        Returns the number of empty buckets in the current hash table.
         """
         empties = 0
         for i in range(self._capacity):
@@ -87,14 +91,13 @@ class HashMap:
 
     def resize_table(self, new_capacity: int) -> None:
         """
+        Takes an integer and resizes the hash table's capacity to that number.
         """
-
         # Validate new capacity and return if not valid
         if new_capacity < 1 or new_capacity < self._size:
             return 
 
         old_table = self._buckets
-
         # Fill new array with requested number of buckets
         self._buckets = DynamicArray()
         for _ in range(new_capacity):
@@ -110,6 +113,8 @@ class HashMap:
 
     def get(self, key: str) -> object:
         """
+        Takes a string and returns the value stored with that string as key, 
+        or None if key does not exist. 
         """
         index = self._get_index(key)
         element = self._buckets[index]
@@ -120,12 +125,16 @@ class HashMap:
 
     def contains_key(self, key: str) -> bool:
         """
+        Takes a string and returns a boolean denoting whether that string
+        is a valid key. 
         """
         index = self._get_index(key)
         return self._buckets[index] != None 
 
     def remove(self, key: str) -> None:
         """
+        Takes a key and removes the element with that key from the 
+        hash table. If key is not found, does nothing. 
         """
         index = self._get_index(key)
         element = self._buckets[index]
@@ -136,6 +145,8 @@ class HashMap:
 
     def clear(self) -> None:
         """
+        Removes all stored elements from the hash table, while retaining
+        its current capacity. 
         """
         self._size = 0
         self._buckets = DynamicArray()
@@ -145,6 +156,8 @@ class HashMap:
 
     def get_keys(self) -> DynamicArray:
         """
+        Returns a DynamicArray containing all valid keys for 
+        objects stored in hash table. 
         """
         keys = DynamicArray()
         for i in range(self._capacity):
@@ -157,9 +170,9 @@ class HashMap:
     # TODO: Make sure this/the program handles instances where capacity is 0 
     def _get_index(self, key: str, skip_tombstones: bool=True) -> int:
         """
-        Takes a key and an optional parameter to accept/ignore tombstone values. 
-        Returns the index of the given key in the hashmap, or of the first open
-        index if key is not found. 
+        Helper method that takes a key and an optional parameter to accept/ignore 
+        tombstone values. Returns the index of the given key in the hashmap, 
+        or of the first open index if key is not found. 
         """
         #TODO: Should I just refactor this to return the element, not the index? Save us all a step? 
         initial_index = self._hash_function(key) % self._capacity
